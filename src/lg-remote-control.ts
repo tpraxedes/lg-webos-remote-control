@@ -47,6 +47,8 @@ class LgRemoteControl extends LitElement {
     private valueDisplayTimeout: NodeJS.Timeout;
     private homeisLongPress: boolean = false;
     private homelongPressTimer: any; // Tipo generico, ma puoi specificare il tipo corretto se lo conosci
+    private _touchStartX: number = 0;
+    private _touchStartY: number = 0;
 
 
     static getConfigElement() {
@@ -213,6 +215,35 @@ class LgRemoteControl extends LitElement {
                                 </div>
                                 <!-- ################################# keypad end ############################## -->
                             ` : html`
+                                ${this.config.touchpad ? html`
+                                <!-- ################################# TOUCHPAD ################################# -->
+                                <div class="grid-container-cursor">
+                                    <button class="btn ripple item_sound touchpad-corner" @click=${() => this._show_sound_output = true}><ha-icon icon="mdi:speaker"/></button>
+                                    <div class="touchpad-area"
+                                        @mousedown=${(e: MouseEvent) => { this._touchStartX = e.clientX; this._touchStartY = e.clientY; }}
+                                        @mouseup=${(e: MouseEvent) => {
+                                            const dx = e.clientX - this._touchStartX;
+                                            const dy = e.clientY - this._touchStartY;
+                                            if (Math.abs(dx) < 30 && Math.abs(dy) < 30) { this._button("ENTER"); }
+                                            else if (Math.abs(dx) >= Math.abs(dy)) { this._button(dx > 0 ? "RIGHT" : "LEFT"); }
+                                            else { this._button(dy > 0 ? "DOWN" : "UP"); }
+                                        }}
+                                        @touchstart=${(e: TouchEvent) => { e.preventDefault(); this._touchStartX = e.touches[0].clientX; this._touchStartY = e.touches[0].clientY; }}
+                                        @touchend=${(e: TouchEvent) => {
+                                            const dx = e.changedTouches[0].clientX - this._touchStartX;
+                                            const dy = e.changedTouches[0].clientY - this._touchStartY;
+                                            if (Math.abs(dx) < 30 && Math.abs(dy) < 30) { this._button("ENTER"); }
+                                            else if (Math.abs(dx) >= Math.abs(dy)) { this._button(dx > 0 ? "RIGHT" : "LEFT"); }
+                                            else { this._button(dy > 0 ? "DOWN" : "UP"); }
+                                        }}>
+                                        <ha-icon icon="mdi:gesture-tap"/>
+                                    </div>
+                                    <button class="btn ripple item_input touchpad-corner" @click=${() => this._show_inputs = true}><ha-icon icon="mdi:import"/></button>
+                                    <button class="btn ripple item_back touchpad-corner" @click=${() => this._button("BACK")}><ha-icon icon="mdi:undo-variant"/></button>
+                                    <button class="btn ripple item_exit touchpad-corner" @click=${() => this._button("EXIT")}>EXIT</button>
+                                </div>
+                                <!-- ################################# TOUCHPAD END ################################# -->
+                                ` : html`
                                 <!-- ################################# DIRECTION PAD ################################# -->
                                 <div class="grid-container-cursor">
                                     <div class="shape">
@@ -229,6 +260,7 @@ class LgRemoteControl extends LitElement {
                                     <button class="btn ripple item_exit" @click=${() => this._button("EXIT")}>EXIT</button>
                                 </div>
                                 <!-- ################################# DIRECTION PAD END ################################# -->
+                                `}
                             `}
 
                         `}
@@ -291,9 +323,9 @@ class LgRemoteControl extends LitElement {
                             <button class="btn-flat flat-low ripple"  @click=${() => this._command("PLAY", "media.controls/play")}><ha-icon icon="mdi:play"/></button>
                             <button class="btn-flat flat-low ripple"  @click=${() => this._command("PAUSE", "media.controls/pause")}><ha-icon icon="mdi:pause"/></button>
                             <button class="btn-flat flat-low ripple"  @click=${() => this._command("STOP", "media.controls/stop")}><ha-icon icon="mdi:stop"/></button>
-                            <button class="btn-flat flat-low ripple"  @click=${() => this._command("REWIND", "media.controls/rewind")}><ha-icon icon="mdi:skip-backward"/></button>
+                            <button class="btn-flat flat-low ripple"  @click=${() => this._command("REWIND", "media.controls/rewind")}><ha-icon icon="mdi:rewind"/></button>
                             <button class="btn-flat flat-low ripple" style="color: red;" @click=${() => this._command("RECORD", "media.controls/Record")}><ha-icon icon="mdi:record"/></button>
-                            <button class="btn-flat flat-low ripple"  @click=${() => this._command("FAST_FOWARD", "media.controls/fastForward")}><ha-icon icon="mdi:skip-forward"/></button>
+                            <button class="btn-flat flat-low ripple"  @click=${() => this._command("FAST_FOWARD", "media.controls/fastForward")}><ha-icon icon="mdi:fast-forward"/></button>
                         </div>
                         <!-- ################################# MEDIA CONTROL END ################################# -->
                         </div>
@@ -625,6 +657,24 @@ class LgRemoteControl extends LitElement {
             grid-template-rows: 1fr 1fr 1fr;
             width: var(--remotewidth);
             grid-template-areas: "sound up input""left ok right""back down exit"}
+          .touchpad-area {
+            grid-column: 1 / 4;
+            grid-row: 1 / 4;
+            width: 85%;
+            height: 85%;
+            border-radius: 20px;
+            margin: auto;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--remote-button-color);
+            user-select: none;
+          }
+          .touchpad-corner {
+            position: relative;
+            z-index: 1;
+          }
           .grid-container-keypad {
             grid-template-rows: 1fr 1fr 1fr 1fr;
             background-color: transparent;
