@@ -218,7 +218,7 @@ class LgRemoteControl extends LitElement {
                                 ${this.config.touchpad ? html`
                                 <!-- ################################# TOUCHPAD ################################# -->
                                 <div class="grid-container-cursor">
-                                    <button class="btn ripple item_sound" @click=${() => this._show_sound_output = true}><ha-icon icon="mdi:speaker"/></button>
+                                    <button class="btn ripple item_sound touchpad-corner" @click=${() => this._show_sound_output = true}><ha-icon icon="mdi:speaker"/></button>
                                     <div class="touchpad-area"
                                         @mousedown=${(e: MouseEvent) => { this._touchStartX = e.clientX; this._touchStartY = e.clientY; }}
                                         @mouseup=${(e: MouseEvent) => {
@@ -228,7 +228,7 @@ class LgRemoteControl extends LitElement {
                                             else if (Math.abs(dx) >= Math.abs(dy)) { this._button(dx > 0 ? "RIGHT" : "LEFT"); }
                                             else { this._button(dy > 0 ? "DOWN" : "UP"); }
                                         }}
-                                        @touchstart=${(e: TouchEvent) => { this._touchStartX = e.touches[0].clientX; this._touchStartY = e.touches[0].clientY; }}
+                                        @touchstart=${(e: TouchEvent) => { e.preventDefault(); this._touchStartX = e.touches[0].clientX; this._touchStartY = e.touches[0].clientY; }}
                                         @touchend=${(e: TouchEvent) => {
                                             const dx = e.changedTouches[0].clientX - this._touchStartX;
                                             const dy = e.changedTouches[0].clientY - this._touchStartY;
@@ -238,9 +238,9 @@ class LgRemoteControl extends LitElement {
                                         }}>
                                         <ha-icon icon="mdi:gesture-tap"/>
                                     </div>
-                                    <button class="btn ripple item_input" @click=${() => this._show_inputs = true}><ha-icon icon="mdi:import"/></button>
-                                    <button class="btn ripple item_back" @click=${() => this._button("BACK")}><ha-icon icon="mdi:undo-variant"/></button>
-                                    <button class="btn ripple item_exit" @click=${() => this._button("EXIT")}>EXIT</button>
+                                    <button class="btn ripple item_input touchpad-corner" @click=${() => this._show_inputs = true}><ha-icon icon="mdi:import"/></button>
+                                    <button class="btn ripple item_back touchpad-corner" @click=${() => this._button("BACK")}><ha-icon icon="mdi:undo-variant"/></button>
+                                    <button class="btn ripple item_exit touchpad-corner" @click=${() => this._button("EXIT")}>EXIT</button>
                                 </div>
                                 <!-- ################################# TOUCHPAD END ################################# -->
                                 ` : html`
@@ -670,6 +670,10 @@ class LgRemoteControl extends LitElement {
             justify-content: center;
             background-color: var(--remote-button-color);
             user-select: none;
+          }
+          .touchpad-corner {
+            position: relative;
+            z-index: 1;
           }
           .grid-container-keypad {
             grid-template-rows: 1fr 1fr 1fr 1fr;
